@@ -39,7 +39,7 @@ while true; do
 
     elif [[ " $VIDEO_EXTENSIONS " == *" $EXT "* ]]; then
       echo "$(date) - Starting Video: $FILE" >> "$LOGFILE"
-      mpv --vo=x11 --no-audio --fs --no-border --really-quiet --loop=once "$FILE" >> "$LOGFILE" 2>&1
+      mpv --no-audio --fs --no-border --really-quiet "$FILE" >> "$LOGFILE" 2>&1
     fi
 
     if [ -f "$RESCAN_FILE" ]; then
