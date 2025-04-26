@@ -23,7 +23,7 @@ while true; do
     \) -printf '%T@ %p\n' | sort -n | cut -d' ' -f2-
   )
 
-  echo "$(date) - Found Files: ${#FILES[@]}" >> "$LOGFILE"
+  echo "$(date) - Found files: ${#FILES[@]}" >> "$LOGFILE"
 
   for FILE in "${FILES[@]}"; do
     EXT="${FILE##*.}"
@@ -31,19 +31,19 @@ while true; do
 
     if [[ " $IMAGE_EXTENSIONS " == *" $EXT "* ]]; then
       DELAY=$(cat "$CONFIG" 2>/dev/null || echo 5)
-      echo "$(date) - showing picture: $FILE (for $DELAY seconds)" >> "$LOGFILE"
+      echo "$(date) - Showing Pciture: $FILE (for $DELAY seconfd)" >> "$LOGFILE"
       feh --fullscreen --auto-zoom --hide-pointer --quiet "$FILE" 2> >(grep -v "Window Manager does not support MWM hints" >> "$LOGFILE") &
       FEH_PID=$!
       sleep "$DELAY"
       kill "$FEH_PID" 2>/dev/null
 
     elif [[ " $VIDEO_EXTENSIONS " == *" $EXT "* ]]; then
-      echo "$(date) - showing video: $FILE" >> "$LOGFILE"
+      echo "$(date) - Starting Video: $FILE" >> "$LOGFILE"
       mpv --vo=x11 --no-audio --fs --no-border --really-quiet --loop=once "$FILE" >> "$LOGFILE" 2>&1
     fi
 
     if [ -f "$RESCAN_FILE" ]; then
-      echo "$(date) - Rescan-Trigger detected – restart slideshow" >> "$LOGFILE"
+      echo "$(date) - Rescan-Trigger detected – reload" >> "$LOGFILE"
       rm -f "$RESCAN_FILE"
       break
     fi
