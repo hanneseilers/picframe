@@ -100,6 +100,7 @@ sudo systemctl enable wifi-check.service
 
 echo "▶️ Running hide_cursor.sh..."
 chmod +x "$HOME/picframe/hide_cursor.sh"
+chmod +x "$HOME/picframe/reset_cursor.sh"
 "$HOME/picframe/hide_cursor.sh"
 
 echo "🌐 Setting up rclone remote 'picframe'..."
@@ -163,9 +164,11 @@ else
 fi
 
 echo "▶️ Running initial sync..."
+chmod +x "$HOME/picframe/sync_slideshow.sh"
 bash "$HOME/picframe/sync_slideshow.sh"
 
 echo "📂 Listing contents of remote 'picframe' to verify connection..."
 rclone lsd picframe:
 
+chmod +x "$HOME/picframe/slideshow.sh"
 echo "✅ Setup complete. Please reboot: sudo reboot"
