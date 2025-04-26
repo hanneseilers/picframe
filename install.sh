@@ -12,10 +12,10 @@ cat > "$HOME/.xinitrc" << 'EOF'
 xset s off
 xset -dpms
 xset s noblank
-~/hide_cursor.sh
+~/picframe/hide_cursor.sh
 unclutter -idle 0 -root &
 xinput disable "$(xinput list | grep -i 'FT5406' | awk -F'id=' '{print $2}' | awk '{print $1}')" 2>/dev/null
-~/slideshow.sh
+~/picframe/slideshow.sh
 EOF
 chmod +x "$HOME/.xinitrc"
 
@@ -99,8 +99,8 @@ EOF
 sudo systemctl enable wifi-check.service
 
 echo "▶️ Running hide_cursor.sh..."
-chmod +x "$HOME/hide_cursor.sh"
-"$HOME/hide_cursor.sh"
+chmod +x "$HOME/picframe/hide_cursor.sh"
+"$HOME/picframe/hide_cursor.sh"
 
 echo "🌐 Setting up rclone remote 'picframe'..."
 if [ ! -f "$HOME/.config/rclone/rclone.conf" ]; then
@@ -159,11 +159,11 @@ read REMOTE_PATH
 if [ -z "$REMOTE_PATH" ]; then
   echo "picframe:" > "$HOME/.sync_remote"
 else
-  echo "picframe:$REMOTE_PATH" > "$HOME/.sync_remote"
+  echo "picframe:$REMOTE_PATH" > "$HOME/picframe/.sync_remote"
 fi
 
 echo "▶️ Running initial sync..."
-bash "$HOME/sync_slideshow.sh"
+bash "$HOME/picframe/sync_slideshow.sh"
 
 echo "📂 Listing contents of remote 'picframe' to verify connection..."
 rclone lsd picframe:

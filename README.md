@@ -44,7 +44,7 @@ This guide explains:
    ```
    *(adjust path if needed)*
 3. Insert SD card and boot the Pi.
-4. Find the IP address via router interface or:
+4. Find the IP address via router interface or, try to use your Pis hostname .local (picframe.local for example, if picframe is your hostname) or:
    ```bash
    nmap -sn 192.168.1.0/24
    ```
@@ -87,12 +87,12 @@ passwd
 
 4. Make the installer executable:
    ```bash
-   chmod +x install_slideshow.sh
+   chmod +x install.sh
    ```
 
 5. Run the installer:
    ```bash
-   ./install_slideshow.sh
+   ./install.sh
    ```
 
 During installation, you will:

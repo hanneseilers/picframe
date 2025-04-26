@@ -1,9 +1,8 @@
 #!/bin/bash
 
-LOGFILE="$HOME/sync.log"
-SLIDESHOW_FOLDER="$HOME/slideshow"
+LOGFILE="$HOME/picframe/sync.log"
+SLIDESHOW_FOLDER="$HOME/picframe/slideshow"
 RESCAN_FILE="$SLIDESHOW_FOLDER/.rescan_trigger"
-REMOTE_PATH_FILE="$HOME/.sync_remote"
 
 if [ ! -f "$REMOTE_PATH_FILE" ]; then
   echo "Error: Remote path not defined. Please create the file $REMOTE_PATH_FILE." >> "$LOGFILE"
