@@ -1,0 +1,171 @@
+
+#!/bin/bash
+set -e
+
+echo "📦 Installing required packages..."
+sudo apt update
+sudo apt install -y python3-flask feh mpv xinit x11-xserver-utils unclutter dnsmasq hostapd network-manager rclone
+
+echo "🔧 Setting up X11 autostart with unclutter..."
+cat > "$HOME/.xinitrc" << 'EOF'
+#!/bin/bash
+xset s off
+xset -dpms
+xset s noblank
+~/hide_cursor.sh
+unclutter -idle 0 -root &
+xinput disable "$(xinput list | grep -i 'FT5406' | awk -F'id=' '{print $2}' | awk '{print $1}')" 2>/dev/null
+~/slideshow.sh
+EOF
+chmod +x "$HOME/.xinitrc"
+
+echo "🛠 Configuring autologin..."
+USER_NAME=$(whoami)
+sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
+cat > /etc/systemd/system/getty@tty1.service.d/override.conf << EOF
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin $USER_NAME --noclear %I \$TERM
+EOF
+
+echo "⚙️ Setting up systemd service for Flask web server..."
+cat > /etc/systemd/system/flask-web.service << EOF
+[Unit]
+Description=Flask Webinterface for Slideshow
+After=network.target
+
+[Service]
+User=$USER_NAME
+WorkingDirectory=/home/$USER_NAME/slideshow-web
+Environment="FLASK_APP=/home/$USER_NAME/slideshow-web/app.py"
+ExecStart=/usr/bin/flask run --host=0.0.0.0 --port=5000
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl enable flask-web.service
+
+echo "🔧 Setting up .bash_profile to autostart X..."
+cat > "$HOME/.bash_profile" << 'EOF'
+if [ -z "$SSH_CONNECTION" ] && [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
+  startx
+fi
+EOF
+
+echo "⚙️ Setting up Wi-Fi fallback check service..."
+cat > /usr/local/bin/wifi_check.sh << 'EOF'
+#!/bin/bash
+echo "[wifi_check] Checking Wi-Fi connection..."
+WIFI_DEVICE=$(nmcli -t -f DEVICE,TYPE device | grep ":wifi" | cut -d: -f1 | head -n1)
+
+if [ -z "$WIFI_DEVICE" ]; then
+    echo "[wifi_check] No Wi-Fi device found."
+    exit 1
+fi
+
+IS_WIFI_CONNECTED=$(nmcli -t -f DEVICE,STATE device | grep "^${WIFI_DEVICE}:connected" || true)
+
+if [ -n "$IS_WIFI_CONNECTED" ]; then
+    echo "[wifi_check] Wi-Fi is connected."
+else
+    echo "[wifi_check] No Wi-Fi connection. Activating hotspot..."
+    sudo nmcli radio wifi on
+    sudo nmcli connection up hotspot
+    sudo systemctl start dnsmasq
+    sudo systemctl start hostapd
+fi
+EOF
+chmod +x /usr/local/bin/wifi_check.sh
+
+cat > /etc/systemd/system/wifi-check.service << EOF
+[Unit]
+Description=WiFi Check and Hotspot Activation
+After=network-online.target NetworkManager-wait-online.service
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/wifi_check.sh
+Type=oneshot
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl enable wifi-check.service
+
+echo "▶️ Running hide_cursor.sh..."
+chmod +x "$HOME/hide_cursor.sh"
+"$HOME/hide_cursor.sh"
+
+echo "🌐 Setting up rclone remote 'picframe'..."
+if [ ! -f "$HOME/.config/rclone/rclone.conf" ]; then
+  echo "No existing rclone config found."
+fi
+
+echo ""
+echo "Which cloud service do you want to configure?"
+echo "1) Nextcloud/Owncloud (via WebDAV)"
+echo "2) Dropbox"
+echo "3) Manual setup (rclone config)"
+read -p "Choice [1-3]: " CLOUD_CHOICE
+
+if [ "$CLOUD_CHOICE" = "1" ]; then
+  while true; do
+    read -p "🔗 Enter your Nextcloud server URL (e.g. https://cloud.example.com/remote.php/webdav): " NEXTCLOUD_URL
+    if [[ "$NEXTCLOUD_URL" == https://* ]]; then
+      break
+    else
+      echo "❗ Please enter a valid URL starting with https://"
+    fi
+  done
+
+  while true; do
+    read -p "👤 Enter username: " NEXTCLOUD_USER
+    if [ -n "$NEXTCLOUD_USER" ]; then
+      break
+    else
+      echo "❗ Username cannot be empty."
+    fi
+  done
+
+  while true; do
+    read -s -p "🔒 Enter password: " NEXTCLOUD_PASS
+    echo
+    if [ -n "$NEXTCLOUD_PASS" ]; then
+      break
+    else
+      echo "❗ Password cannot be empty."
+    fi
+  done
+
+  rclone config create picframe webdav url="$NEXTCLOUD_URL" vendor=nextcloud user="$NEXTCLOUD_USER" pass="$NEXTCLOUD_PASS"
+elif [ "$CLOUD_CHOICE" = "2" ]; then
+  echo "🌐 Starting Dropbox OAuth setup..."
+  rclone config create picframe dropbox
+else
+  echo "🔧 Manual rclone config..."
+  rclone config
+fi
+
+echo ""
+echo "🗂 Please enter the path inside the remote 'picframe' to sync (leave empty for root folder):"
+read REMOTE_PATH
+
+if [ -z "$REMOTE_PATH" ]; then
+  echo "picframe:" > "$HOME/.sync_remote"
+else
+  echo "picframe:$REMOTE_PATH" > "$HOME/.sync_remote"
+fi
+
+echo "▶️ Running initial sync..."
+bash "$HOME/sync_slideshow.sh"
+
+echo "📂 Listing contents of remote 'picframe' to verify connection..."
+rclone lsd picframe:
+
+echo "✅ Setup complete. Please reboot: sudo reboot"
