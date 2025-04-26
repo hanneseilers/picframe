@@ -1,0 +1,65 @@
+name: Create Release on Merge to Master
+
+on:
+  push:
+    branches:
+      - master  # läuft bei jedem Merge auf master
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # nötig für Git-Logs & Tags
+
+      - name: Get latest tag
+        id: get_tag
+        run: |
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Determine version bump
+        id: version_bump
+        run: |
+          MSG=$(git log -1 --pretty=%B)
+          echo "Letzter Merge-Commit: $MSG"
+          OLD=${{ steps.get_tag.outputs.tag }}
+          OLD=${OLD#v}
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$OLD"
+
+          if [[ "$MSG" == *"#major"* ]]; then
+            MAJOR=$((MAJOR+1))
+            MINOR=0
+            PATCH=0
+            echo "Bump: MAJOR"
+          elif [[ "$MSG" == *"#minor"* ]]; then
+            MINOR=$((MINOR+1))
+            PATCH=0
+            echo "Bump: MINOR"
+          else
+            PATCH=$((PATCH+1))
+            echo "Bump: PATCH (Default)"
+          fi
+
+          NEW_TAG="v$MAJOR.$MINOR.$PATCH"
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          LAST_TAG=${{ steps.get_tag.outputs.tag }}
+          LOG=$(git log "$LAST_TAG"..HEAD --pretty=format:"- %s" | tail -n +2)
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$LOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version_bump.outputs.new_tag }}
+          body: ${{ steps.changelog.outputs.changelog }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
