@@ -4,8 +4,8 @@ import os
 
 app = Flask(__name__)
 HOME = os.path.expanduser("~")
-CONFIG_PATH = os.path.join(HOME, ".slideshow_config")
-SYNC_SCRIPT = os.path.join(HOME, "sync_slideshow.sh")
+CONFIG_PATH = os.path.join(HOME, "picframe/.slideshow_config")
+SYNC_SCRIPT = os.path.join(HOME, "picframe/sync_slideshow.sh")
 
 def get_delay():
     if os.path.exists(CONFIG_PATH):
