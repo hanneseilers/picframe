@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Slideshow Settings</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  </head>
+  <body class="bg-light p-4">
+    <div class="container">
+      <h1 class="mb-4">📸 Slideshow Settings</h1>
+      {% if message %}
+        <div class="alert alert-info">{{ message }}</div>
+      {% endif %}
+      <form method="post">
+        <div class="mb-3">
+          <label for="delay" class="form-label">Picture Delay (Seconds)</label>
+          <input type="number" min="1" class="form-control" id="delay" name="delay" value="{{ delay }}">
+        </div>
+        <button type="submit" class="btn btn-primary">💾 Save</button>
+      </form>
+      <hr class="my-4">
+      <form method="post">
+        <input type="hidden" name="sync" value="1">
+        <button type="submit" class="btn btn-success">🔄 Sync now</button>
+      </form>
+      <hr class="my-4">
+      <a href="/wifi" class="btn btn-secondary">📶 Configure WiFi</a>
+    </div>
+  </body>
+</html>
