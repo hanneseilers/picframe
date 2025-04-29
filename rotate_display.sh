@@ -47,7 +47,7 @@ else
 fi
 
 echo "Applying rotation now..."
-DISPLAY=:0 xrandr --output "$DISPLAY_NAME" --rotate "$ROTATE"
+eval "DISPLAY=:0 $XRANDR_CMD"
 
 echo "✅ Display rotation set to $(((ROTATION_CHOICE-1) * 90)) degrees."
 echo "ℹ️ Please reboot to permanently apply the changes: sudo reboot"
