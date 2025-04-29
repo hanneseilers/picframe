@@ -2,7 +2,7 @@
 
 echo "🔄 Configure display rotation"
 echo "Available displays:"
-xrandr --query | grep " connected" | cut -d" " -f1
+DISPLAY=:0 xrandr --query | grep " connected" | cut -d" " -f1
 
 read -p "Enter the name of the display you want to rotate (e.g., DSI-1, HDMI-1): " DISPLAY_NAME
 
@@ -46,5 +46,5 @@ else
   echo "$XRANDR_CMD"
 fi
 
-echo "✅ Display rotation set to $((ROTATION_CHOICE * 90)) degrees."
+echo "✅ Display rotation set to $(((ROTATION_CHOICE-1) * 90)) degrees."
 echo "ℹ️ Please reboot to apply the changes: sudo reboot"
