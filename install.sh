@@ -79,7 +79,7 @@ else
     sudo systemctl start hostapd
 fi
 EOF
-chmod +x /usr/local/bin/wifi_check.sh
+sudo chmod +x /usr/local/bin/wifi_check.sh
 
 cat << EOF | sudo tee /etc/systemd/system/wifi-check.service > /dev/null
 [Unit]
