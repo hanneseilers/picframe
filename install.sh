@@ -167,6 +167,7 @@ else
 fi
 
 echo "▶️ Running initial sync..."
+mkdir "$HOME/picframe-master/slideshow"
 chmod +x "$HOME/picframe-master/sync_slideshow.sh"
 bash "$HOME/picframe-master/sync_slideshow.sh"
 
