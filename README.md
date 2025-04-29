@@ -92,7 +92,7 @@ passwd
 
 5. Run the installer:
    ```bash
-   ./install.sh
+   sudo ./install.sh
    ```
 
 During installation, you will:
