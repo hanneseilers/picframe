@@ -29,7 +29,7 @@ ExecStart=-/sbin/agetty --autologin $USER_NAME --noclear %I \$TERM
 EOF
 
 echo "⚙️ Setting up systemd service for Flask web server..."
-cat << EOF | sudo tee > /etc/systemd/system/flask-web.service > /dev/null
+cat << EOF | sudo tee /etc/systemd/system/flask-web.service > /dev/null
 [Unit]
 Description=Flask Webinterface for Slideshow
 After=network.target
