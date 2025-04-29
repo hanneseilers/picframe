@@ -153,6 +153,9 @@ else
   rclone config
 fi
 
+echo "📂 Listing contents of remote 'picframe' to verify connection..."
+rclone lsd picframe:
+
 echo ""
 echo "🗂 Please enter the path inside the remote 'picframe' to sync (leave empty for root folder):"
 read REMOTE_PATH
@@ -166,9 +169,6 @@ fi
 echo "▶️ Running initial sync..."
 chmod +x "$HOME/picframe-master/sync_slideshow.sh"
 bash "$HOME/picframe-master/sync_slideshow.sh"
-
-echo "📂 Listing contents of remote 'picframe' to verify connection..."
-rclone lsd picframe:
 
 chmod +x "$HOME/picframe-master/slideshow.sh"
 echo "✅ Setup complete. Please reboot: sudo reboot"
