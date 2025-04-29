@@ -20,7 +20,7 @@ EOF
 chmod +x "$HOME/.xinitrc"
 
 echo "🛠 Configuring autologin..."
-USER_NAME=$(whoami)
+
 sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
 cat << EOF | sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf > /dev/null
 [Service]
@@ -35,15 +35,22 @@ Description=Flask Webinterface for Slideshow
 After=network.target
 
 [Service]
-User=$USER_NAME
-WorkingDirectory=/home/$USER_NAME/slideshow-web
-Environment="FLASK_APP=/home/$USER_NAME/slideshow-web/app.py"
+User=$USER
+WorkingDirectory=/home/$USER/picframe-master/slideshow-web
+Environment="FLASK_APP=/home/$USER/picframe-master/slideshow-web/app.py"
 ExecStart=/usr/bin/flask run --host=0.0.0.0 --port=5000
 Restart=always
 
 [Install]
 WantedBy=multi-user.target
 EOF
+
+SUDOERS_FILE="/etc/sudoers.d/${USER_NAME}-nmcli"
+echo "➕ Creating sudoers-file: $SUDOERS_FILE"
+sudo cat << EOF | sudo tee "$SUDOERS_FILE" > /dev/null
+${USER_NAME} ALL=(ALL) NOPASSWD: /usr/bin/nmcli, /sbin/reboot
+EOF
+sudo chmod 0440 "$SUDOERS_FILE"
 
 sudo systemctl daemon-reexec
 sudo systemctl daemon-reload
@@ -57,7 +64,7 @@ fi
 EOF
 
 echo "⚙️ Setting up Wi-Fi fallback check service..."
-cat << EOF | sudo tee /usr/local/bin/wifi_check.sh > /dev/null
+cat << 'EOF' | sudo tee /usr/local/bin/wifi_check.sh > /dev/null
 #!/bin/bash
 echo "[wifi_check] Checking Wi-Fi connection..."
 WIFI_DEVICE=$(nmcli -t -f DEVICE,TYPE device | grep ":wifi" | cut -d: -f1 | head -n1)
@@ -74,14 +81,38 @@ if [ -n "$IS_WIFI_CONNECTED" ]; then
 else
     echo "[wifi_check] No Wi-Fi connection. Activating hotspot..."
     sudo nmcli radio wifi on
-    sudo nmcli connection up hotspot
-    sudo systemctl start dnsmasq
-    sudo systemctl start hostapd
+    sudo nmcli connection up picframe
+    sudo systemctl restart dnsmasq
+    sudo systemctl restart hostapd
 fi
 EOF
 sudo chmod +x /usr/local/bin/wifi_check.sh
 
-cat << EOF | sudo tee /etc/systemd/system/wifi-check.service > /dev/null
+echo "   writing hotspot configuration..."
+cat << 'EOF' | sudo tee /etc/hostapd/hostapd.conf > /dev/null
+interface=wlan0
+ssid=picframe
+hw_mode=g
+channel=6
+macaddr_acl=0
+auth_algs=1
+ignore_broadcast_ssid=0
+wmm_enabled=1
+wpa=0
+EOF
+
+cat << 'EOF' | sudo tee /etc/dnsmasq.conf > /dev/null
+interface=wlan0
+dhcp-range=192.168.4.2,192.168.4.20,255.255.255.0,24h
+address=/#/192.168.4.1
+EOF
+
+sudo systemctl unmask hostapd
+sudo systemctl enable hostapd
+sudo systemctl enable dnsmasq
+
+echo "   creating wifi check service ..."
+cat << 'EOF' | sudo tee /etc/systemd/system/wifi-check.service > /dev/null
 [Unit]
 Description=WiFi Check and Hotspot Activation
 After=network-online.target NetworkManager-wait-online.service
