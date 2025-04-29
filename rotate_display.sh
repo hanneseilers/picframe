@@ -1,26 +1,31 @@
 #!/bin/bash
 
 echo "🔄 Configure display rotation"
+echo "Available displays:"
+xrandr --query | grep " connected" | cut -d" " -f1
 
-echo "Please choose the rotation angle:"
-echo "0) 0 degrees (normal)"
-echo "1) 90 degrees (right)"
-echo "2) 180 degrees (upside down)"
-echo "3) 270 degrees (left)"
-read -p "Choice [0-3]: " ROTATION_CHOICE
+read -p "Enter the name of the display you want to rotate (e.g., DSI-1, HDMI-1): " DISPLAY_NAME
 
+echo "Choose rotation angle:"
+echo "  1) 0   - normal"
+echo "  2) 90  - rotate right"
+echo "  3) 180 - inverted"
+echo "  4) 270 - rotate left"
+read -p "Enter rotation angle choise (1, 2, 3, 4): " ROTATION_CHOICE
+
+# Map angle to xrandr rotation
 case "$ROTATION_CHOICE" in
-  0)
-    ROTATE_VALUE=0
-    ;;
   1)
-    ROTATE_VALUE=1
+    ROTATE="normal"
     ;;
   2)
-    ROTATE_VALUE=2
+    ROTATE="right"
     ;;
   3)
-    ROTATE_VALUE=3
+    ROTATE="inverted"
+    ;;
+  4)
+    ROTATE="left"
     ;;
   *)
     echo "❗ Invalid choice. No changes made."
@@ -28,19 +33,18 @@ case "$ROTATION_CHOICE" in
     ;;
 esac
 
-CONFIG_FILE="/boot/config.txt"
+# Ensure .xinitrc exists
+touch ~/.xinitrc
 
-# Backup the original config.txt
-sudo cp "$CONFIG_FILE" "${CONFIG_FILE}.bak"
-
-# Remove old rotation settings if they exist
-sudo sed -i '/^lcd_rotate=/d' "$CONFIG_FILE"
-sudo sed -i '/^display_lcd_rotate=/d' "$CONFIG_FILE"
-
-# Add new rotation setting
-echo "" | sudo tee -a "$CONFIG_FILE"
-echo "# Added by Picframe setup: Rotate display" | sudo tee -a "$CONFIG_FILE"
-echo "display_lcd_rotate=$ROTATE_VALUE" | sudo tee -a "$CONFIG_FILE"
+# Append xrandr command if not already present
+XRANDR_CMD="xrandr --output $DISPLAY_NAME --rotate $ROTATE"
+if grep -Fxq "$XRANDR_CMD" ~/.xinitrc; then
+  echo "The rotation command is already present in .xinitrc."
+else
+  echo "$XRANDR_CMD" >> ~/.xinitrc
+  echo "Added the following line to .xinitrc:"
+  echo "$XRANDR_CMD"
+fi
 
 echo "✅ Display rotation set to $((ROTATION_CHOICE * 90)) degrees."
 echo "ℹ️ Please reboot to apply the changes: sudo reboot"
