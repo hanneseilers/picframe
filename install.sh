@@ -101,7 +101,7 @@ sudo systemctl enable wifi-check.service
 echo "▶️ Running hide_cursor.sh..."
 chmod +x "$HOME/picframe-master/hide_cursor.sh"
 chmod +x "$HOME/picframe-master/reset_cursor.sh"
-"$HOME/picframe-master/hide_cursor.sh"
+# "$HOME/picframe-master/hide_cursor.sh"
 
 echo "🌐 Setting up rclone remote 'picframe'..."
 if [ ! -f "$HOME/.config/rclone/rclone.conf" ]; then
