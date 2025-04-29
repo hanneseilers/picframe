@@ -57,7 +57,7 @@ fi
 EOF
 
 echo "⚙️ Setting up Wi-Fi fallback check service..."
-sudo cat > /usr/local/bin/wifi_check.sh << 'EOF'
+cat << EOF | sudo tee > /usr/local/bin/wifi_check.sh > /dev/null
 #!/bin/bash
 echo "[wifi_check] Checking Wi-Fi connection..."
 WIFI_DEVICE=$(nmcli -t -f DEVICE,TYPE device | grep ":wifi" | cut -d: -f1 | head -n1)
@@ -81,7 +81,7 @@ fi
 EOF
 chmod +x /usr/local/bin/wifi_check.sh
 
-sudo cat > /etc/systemd/system/wifi-check.service << EOF
+cat << EOF | sudo tee /etc/systemd/system/wifi-check.service > /dev/null
 [Unit]
 Description=WiFi Check and Hotspot Activation
 After=network-online.target NetworkManager-wait-online.service
