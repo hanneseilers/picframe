@@ -48,7 +48,7 @@ def wifi():
                     cmd += ["password", password]
                 subprocess.run(cmd, check=True)
                 message = "✅ Connected. Restarting..."
-                subprocess.Popen(["sudo reboot"])
+                subprocess.Popen(["sudo", "reboot"])
             except subprocess.CalledProcessError:
                 message = "❌ Connection Error."
     networks = get_available_networks()
