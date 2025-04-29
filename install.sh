@@ -57,7 +57,7 @@ fi
 EOF
 
 echo "⚙️ Setting up Wi-Fi fallback check service..."
-cat << EOF | sudo tee > /usr/local/bin/wifi_check.sh > /dev/null
+cat << EOF | sudo tee /usr/local/bin/wifi_check.sh > /dev/null
 #!/bin/bash
 echo "[wifi_check] Checking Wi-Fi connection..."
 WIFI_DEVICE=$(nmcli -t -f DEVICE,TYPE device | grep ":wifi" | cut -d: -f1 | head -n1)
