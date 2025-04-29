@@ -36,15 +36,35 @@ esac
 # Ensure .xinitrc exists
 touch ~/.xinitrc
 
-# Append xrandr command if not already present
+# Define paths
+XINITRC="$HOME/.xinitrc"
+BACKUP="$HOME/.xinitrc.backup"
 XRANDR_CMD="xrandr --output $DISPLAY_NAME --rotate $ROTATE"
-if grep -Fxq "$XRANDR_CMD" ~/.xinitrc; then
-  echo "The rotation command is already present in .xinitrc."
-else
-  echo "$XRANDR_CMD" >> ~/.xinitrc
-  echo "Added the following line to .xinitrc:"
-  echo "$XRANDR_CMD"
+
+# Backup .xinitrc if it exists
+if [ -f "$XINITRC" ]; then
+  cp "$XINITRC" "$BACKUP"
+  echo "Backup of existing .xinitrc saved to $BACKUP"
 fi
+
+# Prepare new .xinitrc
+{
+  if grep -q '^#!' "$XINITRC" 2>/dev/null; then
+    # Preserve shebang line
+    head -n1 "$XINITRC"
+    echo "$XRANDR_CMD"
+    # Remove previous identical xrandr lines and shebang from the rest
+    tail -n +2 "$XINITRC" | grep -vF "$XRANDR_CMD"
+  else
+    # No shebang found – just insert xrandr at the top
+    echo '#!/bin/bash'
+    echo "$XRANDR_CMD"
+    cat "$XINITRC" 2>/dev/null | grep -vF "$XRANDR_CMD"
+  fi
+} > "$XINITRC.new"
+
+mv "$XINITRC.new" "$XINITRC"
+chmod +x "$XINITRC"
 
 echo "Applying rotation now..."
 eval "DISPLAY=:0 $XRANDR_CMD"
