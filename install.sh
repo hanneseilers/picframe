@@ -22,14 +22,14 @@ chmod +x "$HOME/.xinitrc"
 echo "🛠 Configuring autologin..."
 USER_NAME=$(whoami)
 sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
-cat > /etc/systemd/system/getty@tty1.service.d/override.conf << EOF
+sudo cat > /etc/systemd/system/getty@tty1.service.d/override.conf << EOF
 [Service]
 ExecStart=
 ExecStart=-/sbin/agetty --autologin $USER_NAME --noclear %I \$TERM
 EOF
 
 echo "⚙️ Setting up systemd service for Flask web server..."
-cat > /etc/systemd/system/flask-web.service << EOF
+sudo cat > /etc/systemd/system/flask-web.service << EOF
 [Unit]
 Description=Flask Webinterface for Slideshow
 After=network.target
@@ -57,7 +57,7 @@ fi
 EOF
 
 echo "⚙️ Setting up Wi-Fi fallback check service..."
-cat > /usr/local/bin/wifi_check.sh << 'EOF'
+sudo cat > /usr/local/bin/wifi_check.sh << 'EOF'
 #!/bin/bash
 echo "[wifi_check] Checking Wi-Fi connection..."
 WIFI_DEVICE=$(nmcli -t -f DEVICE,TYPE device | grep ":wifi" | cut -d: -f1 | head -n1)
@@ -81,7 +81,7 @@ fi
 EOF
 chmod +x /usr/local/bin/wifi_check.sh
 
-cat > /etc/systemd/system/wifi-check.service << EOF
+sudo cat > /etc/systemd/system/wifi-check.service << EOF
 [Unit]
 Description=WiFi Check and Hotspot Activation
 After=network-online.target NetworkManager-wait-online.service
