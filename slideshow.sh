@@ -3,7 +3,7 @@
 FOLDER="$HOME/picframe-master/slideshow"
 CONFIG="$HOME/picframe-master/.slideshow_config"
 LOGFILE="$HOME/picframe-master/slideshow.log"
-RESCAN_FILE="$FOLDER/picframe-master/.rescan_trigger"
+RESCAN_FILE="$FOLDER/picframe-master/slideshow/.rescan_trigger"
 
 xset -dpms
 xset s off
