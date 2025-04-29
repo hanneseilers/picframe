@@ -1,9 +1,9 @@
 #!/bin/bash
 
-FOLDER="$HOME/picframe/slideshow"
-CONFIG="$HOME/picframe/.slideshow_config"
-LOGFILE="$HOME/picframe/slideshow.log"
-RESCAN_FILE="$FOLDER/picframe/.rescan_trigger"
+FOLDER="$HOME/picframe-master/slideshow"
+CONFIG="$HOME/picframe-master/.slideshow_config"
+LOGFILE="$HOME/picframe-master/slideshow.log"
+RESCAN_FILE="$FOLDER/picframe-master/.rescan_trigger"
 
 xset -dpms
 xset s off

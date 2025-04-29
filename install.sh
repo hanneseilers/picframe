@@ -12,24 +12,24 @@ cat > "$HOME/.xinitrc" << 'EOF'
 xset s off
 xset -dpms
 xset s noblank
-~/picframe/hide_cursor.sh
+~/picframe-master/hide_cursor.sh
 unclutter -idle 0 -root &
 xinput disable "$(xinput list | grep -i 'FT5406' | awk -F'id=' '{print $2}' | awk '{print $1}')" 2>/dev/null
-~/picframe/slideshow.sh
+~/picframe-master/slideshow.sh
 EOF
 chmod +x "$HOME/.xinitrc"
 
 echo "🛠 Configuring autologin..."
 USER_NAME=$(whoami)
 sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
-cat > /etc/systemd/system/getty@tty1.service.d/override.conf << EOF
+cat << EOF | sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf > /dev/null
 [Service]
 ExecStart=
 ExecStart=-/sbin/agetty --autologin $USER_NAME --noclear %I \$TERM
 EOF
 
 echo "⚙️ Setting up systemd service for Flask web server..."
-cat > /etc/systemd/system/flask-web.service << EOF
+cat << EOF | sudo tee /etc/systemd/system/flask-web.service > /dev/null
 [Unit]
 Description=Flask Webinterface for Slideshow
 After=network.target
@@ -57,7 +57,7 @@ fi
 EOF
 
 echo "⚙️ Setting up Wi-Fi fallback check service..."
-cat > /usr/local/bin/wifi_check.sh << 'EOF'
+cat << EOF | sudo tee /usr/local/bin/wifi_check.sh > /dev/null
 #!/bin/bash
 echo "[wifi_check] Checking Wi-Fi connection..."
 WIFI_DEVICE=$(nmcli -t -f DEVICE,TYPE device | grep ":wifi" | cut -d: -f1 | head -n1)
@@ -79,9 +79,9 @@ else
     sudo systemctl start hostapd
 fi
 EOF
-chmod +x /usr/local/bin/wifi_check.sh
+sudo chmod +x /usr/local/bin/wifi_check.sh
 
-cat > /etc/systemd/system/wifi-check.service << EOF
+cat << EOF | sudo tee /etc/systemd/system/wifi-check.service > /dev/null
 [Unit]
 Description=WiFi Check and Hotspot Activation
 After=network-online.target NetworkManager-wait-online.service
@@ -99,9 +99,9 @@ EOF
 sudo systemctl enable wifi-check.service
 
 echo "▶️ Running hide_cursor.sh..."
-chmod +x "$HOME/picframe/hide_cursor.sh"
-chmod +x "$HOME/picframe/reset_cursor.sh"
-"$HOME/picframe/hide_cursor.sh"
+chmod +x "$HOME/picframe-master/hide_cursor.sh"
+chmod +x "$HOME/picframe-master/reset_cursor.sh"
+# "$HOME/picframe-master/hide_cursor.sh"
 
 echo "🌐 Setting up rclone remote 'picframe'..."
 if [ ! -f "$HOME/.config/rclone/rclone.conf" ]; then
@@ -153,6 +153,9 @@ else
   rclone config
 fi
 
+echo "📂 Listing contents of remote 'picframe' to verify connection..."
+rclone lsd picframe:
+
 echo ""
 echo "🗂 Please enter the path inside the remote 'picframe' to sync (leave empty for root folder):"
 read REMOTE_PATH
@@ -160,15 +163,13 @@ read REMOTE_PATH
 if [ -z "$REMOTE_PATH" ]; then
   echo "picframe:" > "$HOME/.sync_remote"
 else
-  echo "picframe:$REMOTE_PATH" > "$HOME/picframe/.sync_remote"
+  echo "picframe:$REMOTE_PATH" > "$HOME/picframe-master/.sync_remote"
 fi
 
 echo "▶️ Running initial sync..."
-chmod +x "$HOME/picframe/sync_slideshow.sh"
-bash "$HOME/picframe/sync_slideshow.sh"
+mkdir "$HOME/picframe-master/slideshow"
+chmod +x "$HOME/picframe-master/sync_slideshow.sh"
+bash "$HOME/picframe-master/sync_slideshow.sh"
 
-echo "📂 Listing contents of remote 'picframe' to verify connection..."
-rclone lsd picframe:
-
-chmod +x "$HOME/picframe/slideshow.sh"
+chmod +x "$HOME/picframe-master/slideshow.sh"
 echo "✅ Setup complete. Please reboot: sudo reboot"

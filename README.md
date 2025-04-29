@@ -76,13 +76,13 @@ passwd
 
 2. Download the latest release from GitHub:
    ```bash
-   wget https://github.com/hanneseilers/picframe/releases/latest/download/picframe.zip
+   wget https://github.com/hanneseilers/picframe/archive/refs/heads/master.zip
    ```
 
 3. Unzip the archive:
    ```bash
-   unzip picframe.zip
-   cd picframe
+   unzip master.zip
+   cd picframe-master
    ```
 
 4. Make the installer executable:
@@ -92,7 +92,7 @@ passwd
 
 5. Run the installer:
    ```bash
-   ./install.sh
+   sudo ./install.sh
    ```
 
 During installation, you will:
