@@ -49,4 +49,4 @@ fi
 DISPLAY=:0 "$XRANDR_CMD"
 
 echo "✅ Display rotation set to $(((ROTATION_CHOICE-1) * 90)) degrees."
-echo "ℹ️ Please reboot to apply the changes: sudo reboot"
+echo "ℹ️ Please reboot to permanently apply the changes: sudo reboot"
