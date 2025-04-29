@@ -43,12 +43,12 @@ def wifi():
         password = request.form.get("password")
         if ssid:
             try:
-                cmd = ["nmcli", "dev", "wifi", "connect", ssid]
+                cmd = ["sudo", "nmcli", "dev", "wifi", "connect", ssid]
                 if password:
                     cmd += ["password", password]
                 subprocess.run(cmd, check=True)
                 message = "✅ Connected. Restarting..."
-                subprocess.Popen(["reboot"])
+                subprocess.Popen(["sudo reboot"])
             except subprocess.CalledProcessError:
                 message = "❌ Connection Error."
     networks = get_available_networks()
