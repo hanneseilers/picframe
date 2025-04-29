@@ -1,7 +1,7 @@
 #!/bin/bash
 
-LOGFILE="$HOME/picframe/sync.log"
-SLIDESHOW_FOLDER="$HOME/picframe/slideshow"
+LOGFILE="$HOME/picframe-master/sync.log"
+SLIDESHOW_FOLDER="$HOME/picframe-master/slideshow"
 RESCAN_FILE="$SLIDESHOW_FOLDER/.rescan_trigger"
 
 if [ ! -f "$REMOTE_PATH_FILE" ]; then
