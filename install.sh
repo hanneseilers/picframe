@@ -22,14 +22,14 @@ chmod +x "$HOME/.xinitrc"
 echo "🛠 Configuring autologin..."
 USER_NAME=$(whoami)
 sudo mkdir -p /etc/systemd/system/getty@tty1.service.d
-sudo cat > /etc/systemd/system/getty@tty1.service.d/override.conf << EOF
+cat << EOF | sudo tee /etc/systemd/system/getty@tty1.service.d/override.conf > /dev/null
 [Service]
 ExecStart=
 ExecStart=-/sbin/agetty --autologin $USER_NAME --noclear %I \$TERM
 EOF
 
 echo "⚙️ Setting up systemd service for Flask web server..."
-sudo cat > /etc/systemd/system/flask-web.service << EOF
+cat << EOF | sudo tee > /etc/systemd/system/flask-web.service > /dev/null
 [Unit]
 Description=Flask Webinterface for Slideshow
 After=network.target
