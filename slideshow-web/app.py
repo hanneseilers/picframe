@@ -31,7 +31,7 @@ def index():
             message = "Delay saved."
         elif "sync" in request.form:
             subprocess.Popen([SYNC_SCRIPT])
-            message = "Sync startett."
+            message = "Sync started."
         return render_template("index.html", delay=get_delay(), message=message)
     return render_template("index.html", delay=get_delay(), message=message)
 
